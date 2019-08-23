@@ -32,9 +32,9 @@ int assignment1( std::istream& is, std::ostream& os ){
 
 
 
-	std::string prompt1("What’s your favorite color? ");
-	std::string prompt2("What’s your favorite integer? ");
-	std::string prompt3("What’s your favorite number? ");
+	std::string prompt1("What's your favorite color? ");
+	std::string prompt2("What's your favorite integer? ");
+	std::string prompt3("What's your favorite number? ");
 
 	std::string color(getString(is, os, prompt1));
 
@@ -48,7 +48,7 @@ int assignment1( std::istream& is, std::ostream& os ){
 		os << i + 1 << " " << color << " " << num << std::endl;
 	}	
 
-	return 0;
+	return num_loops;
 }
 
 
