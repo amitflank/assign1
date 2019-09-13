@@ -2,5 +2,5 @@
 #include "image_menu.h"
 
 int main() {
-	return assignment2(std::cin, std::cout);
+	return imageMenu(std::cin, std::cout);
 }

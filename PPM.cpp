@@ -60,7 +60,7 @@ int PPM::index(const int& row, const int& column, const int& channel) const {
 }
 
 //Gets number of RGB values in image
-unsigned int PPM::getImageVectorSize() {
+int PPM::getImageVectorSize() {
   return getHeight() * getWidth() * 3;
 }
 
@@ -110,15 +110,16 @@ void PPM::setPixel(const int& row, const int& column, const int& red, const int&
 
 //figure this operator overload stuff and do it later i guess
 std::ostream& operator<<( std::ostream& os, const PPM& rhs) {
-  char vec[rhs.mImageData.size()];
+  char *vec = new char[rhs.mImageData.size()];
 
-
-  for (int i = 0; i < rhs.mImageData.size(); i++) {
+  int vec_size = 0;
+  for (int i = 0; i < (int) rhs.mImageData.size(); i++) {
       vec[i] = rhs.mImageData[i];
+      vec_size++;
   }
 
   os << 'P' << '6' << ' ' << rhs.getWidth() << ' ' << rhs.getHeight() << ' ' << rhs.getMaxColorValue() << std::endl;
-  os.write((char *) &vec, sizeof(vec));
+  os.write((char *) vec, vec_size);
 
   return os;
 }

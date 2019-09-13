@@ -21,8 +21,8 @@ class PPM {
     void setMaxColorValue(const int& max_color_value);
     void setChannel(const int& row, const int& column, const int& channel, const int& value);
     void setPixel(const int& row, const int& column, const int& red, const int& green, const int& blue);
-    unsigned int getImageVectorSize();
-    std::vector <unsigned int> mImageData;
+    int getImageVectorSize();
+    std::vector <int> mImageData;
 
   private:
 
