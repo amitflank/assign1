@@ -24,6 +24,7 @@ void drawCircle(std::istream& is, std::ostream& os, PPM& src);
 void drawBox(std::istream& is, std::ostream& os, PPM& src);
 void takeAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image);
 int imageMenu(std::istream& is, std::ostream& os);
+void readUserImage(std::istream& is, std::ostream& os, PPM& ppm);
 
 bool inDiamond(int row, int col, int cRow, int cCol, int size);
 bool inCircle(int row, int col, int cRow, int cCol, int radius);

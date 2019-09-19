@@ -2,7 +2,7 @@
 #include <string>
 #include <fstream>
 #include <cmath>
-#include "PPM.h"
+#include "image_menu.h"
 
 std::string getString( std::istream& is, std::ostream& os, const std::string& prompt ) {
 
@@ -109,8 +109,13 @@ int assignment2(std::istream& is, std::ostream& os) {
 
 void showMenu(std::ostream& os){
 	os << "\nActions available:\n\n";
-	os << "write) Write output image to file.\n" ;
+	os << "read1) Read file into input image 1.\n";
+	os << "write) Write output image to file.\n";
 	os << "copy) Copy input image 1 to output image.\n";
+	os << "red-gray) Set output image from input image 1's grayscale from red.\n";
+	os << "green-gray) Set output image from input image 1's grayscale from green.\n";
+	os << "blue-gray) Set output image from input image 1's grayscale from blue.\n";
+	os << "linear-gray) Set output image from input image 1's grayscale from linear colorimetric.\n";
 	os << "# Comment to end of line\n";
 	os << "size) Set the size of input image 1\n";
 	os << "max) Set the max color value of input image 1\n";
@@ -129,16 +134,7 @@ std::string getChoice(std::istream& is, std::ostream& os) {
 }
 
 void commentLine(std::istream& is) {
-
-	/*get length of input stream, prob unecessry since we don't really care
-	about length since we don't need stream contents here*/
-	//is.seekg (0, is.end);
-	//int length = is.tellg();
-	//is.seekg (0, is.beg); // return to beggining of input
-
- //don't really care what this stores since we are just trying to move the internal pointer for is
 	char * buffer = new char [1];
-
 
 	while(true) {
 		is.read(buffer, 1);
@@ -291,6 +287,21 @@ void takeAction(std::istream& is, std::ostream& os, const std::string& choice, P
 	if (choice.compare("write") == 0) {
 		writeUserImage(is, os, output_image);
 	}
+	else if(choice.compare("read1") == 0){
+		readUserImage(is, os, input_image1);
+	}
+	else if(choice.compare("red-gray") == 0){
+		input_image1.grayFromRed(output_image);
+	}
+	else if(choice.compare("blue-gray") == 0){
+		input_image1.grayFromBlue(output_image);
+	}
+	else if(choice.compare("green-gray") == 0){
+		input_image1.grayFromGreen(output_image);
+	}
+	else if(choice.compare("linear-gray") == 0){
+		input_image1.grayFromLinearColorimetric(output_image);
+	}
 	else if (choice.compare("copy") == 0) {
 		output_image = input_image1;
 	}
@@ -351,7 +362,19 @@ int imageMenu(std::istream& is, std::ostream& os){
 		takeAction(is, os, choice, img1, img2, outfile);
 
 	}
+	std::string filename = "bye.ppm";
+	std::ifstream testing(filename.c_str());
+	testing >> img2;
 
 
 	return 0;
+}
+
+void readUserImage(std::istream& is, std::ostream& os, PPM& ppm){
+	std::string file_prompt = "Input filename? ";
+	std::string filename = getString(is, os, file_prompt);
+	std::ifstream inFile(filename.c_str());
+
+	inFile >> ppm;
+	inFile.close();
 }

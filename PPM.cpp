@@ -1,5 +1,5 @@
 #include "PPM.h"
-
+#include <sstream>
 
 PPM::PPM() {
   setMaxColorValue(0);
@@ -8,8 +8,6 @@ PPM::PPM() {
   mImageData.resize(getImageVectorSize());
 }
 
-  //could be an issue with refrence assignment and data type not matching
-  //unisgne int and const int i guess
 PPM::PPM(const int& height, const int& width) {
   setMaxColorValue(0);
   setHeight(height);
@@ -86,7 +84,11 @@ void PPM::setWidth( const int& width) {
   }
 
 }
-
+void PPM::setMetaData(int width, int height, int max_color){
+  setWidth(width);
+  setHeight(height);
+  setMaxColorValue(max_color);
+}
 void PPM::setMaxColorValue( const int& max_color_value) {
   if(max_color_value >= 0 && max_color_value < 256){
     mMaxColorValue = max_color_value;
@@ -105,11 +107,60 @@ void PPM::setPixel(const int& row, const int& column, const int& red, const int&
   setChannel(row, column, 1, green);
   setChannel(row, column, 2, blue);
 }
+void PPM::assignToSource(int row, int col, int src_chan, PPM src_img) {
+    int val = src_img.getChannel(row, col, src_chan);
+    setPixel(row, col, val, val, val);
+  }
+
+void PPM::grayFromChannel(PPM& dst, const int& src_channel) const{
+  int width = getWidth();
+  int height = getHeight();
+  int max_color_value = getMaxColorValue();
+  dst.setMetaData(width, height, max_color_value);
+
+  for(int row = 0; row < height; row++) {
+    for(int col = 0; col < width; col ++) {
+      dst.assignToSource(row, col, src_channel, *this);
+      }
+    }
+  }
+
+  void PPM::grayFromRed(PPM& dst) const {
+    this->grayFromChannel(dst, 0);
+  }
+  void PPM::grayFromGreen(PPM& dst) const{
+    this->grayFromChannel(dst, 1);
+  }
+  void PPM::grayFromBlue(PPM& dst) const{
+    this->grayFromChannel(dst, 2);
+  }
 
 
+double PPM::linearColorimetricPixelValue(const int& row, const int& column) const{
+  int red = getChannel(row, column, 0);
+  int green = getChannel(row, column, 1);
+  int blue = getChannel(row, column, 2);
+  return (0.2126*red + 0.7152*green + 0.0722*blue);
+}
+
+//this is stupid bad coding yay for lazieness!!!
+void PPM::grayFromLinearColorimetric(PPM& dst) const{
+  int width = getWidth();
+  int height = getHeight();
+  int max_color_value = getMaxColorValue();
+  dst.setMetaData(width, height, max_color_value);
+  int val;
+
+  for(int row = 0; row < height; row++) {
+    for(int col = 0; col < width; col ++) {
+      val = (int) linearColorimetricPixelValue(row, col);
+      dst.setPixel(row, col, val, val, val);
+    }
+  }
+}
 
 //figure this operator overload stuff and do it later i guess
-std::ostream& operator<<( std::ostream& os, const PPM& rhs) {
+std::ostream& operator<<(std::ostream& os, const PPM& rhs) {
   char *vec = new char[rhs.mImageData.size()];
 
   int vec_size = 0;
@@ -122,4 +173,81 @@ std::ostream& operator<<( std::ostream& os, const PPM& rhs) {
   os.write((char *) vec, vec_size);
 
   return os;
+}
+
+int PPM::getRowFromIndex(int index){
+  int num_cols = getWidth();
+
+  int row = index / (num_cols * 3);
+  return row;
+}
+
+int PPM::getColFromIndex(int index){
+  int num_cols = getWidth();
+
+  int row = getRowFromIndex(index);
+  int col = (index - (row * num_cols * 3)) / 3;
+  return col;
+}
+
+int PPM::getChanFromIndex(int index){
+  int num_cols = getWidth();
+
+  int row = getRowFromIndex(index);
+  int col = getColFromIndex(index);
+
+  int chan = index - (row * num_cols * 3) - col * 3;
+  return chan;
+
+}
+
+void skipNL(std::istream& is)  {
+  unsigned char c;
+  while(true){
+    if(is.peek() == '\n'){
+      is.read((char*) &c,1);
+    }
+    else{
+      break;
+    }
+  }
+}
+std::istream& operator>>(std::istream& is, PPM& rhs){
+  unsigned char c;
+  char tmp1;
+  std::string tmp;
+  int width, height, max;
+
+  //get meta data assign it and skip first white space
+  is >> tmp;
+  skipNL(is);
+  is >> width;
+  rhs.setWidth(width);
+  skipNL(is);
+  is >> height;
+  rhs.setHeight(height);
+  skipNL(is);
+  is >> max;
+  rhs.setMaxColorValue(max);
+  skipNL(is);
+
+  int index = 0;
+  int row;
+  int col;
+  int chan;
+
+
+  while(index < width * height * 3) {
+    is.read((char*) &tmp1,1);
+    c = (unsigned char) tmp1;
+
+    row = rhs.getRowFromIndex(index);
+    col = rhs.getColFromIndex(index);
+    chan = rhs.getChanFromIndex(index);
+
+    rhs.setChannel(row, col, chan, c);
+    index++;
+  }
+  return is;
+
 }
