@@ -25,9 +25,16 @@ void drawBox(std::istream& is, std::ostream& os, PPM& src);
 void takeAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image);
 int imageMenu(std::istream& is, std::ostream& os);
 void readUserImage(std::istream& is, std::ostream& os, PPM& ppm);
-
 bool inDiamond(int row, int col, int cRow, int cCol, int size);
 bool inCircle(int row, int col, int cRow, int cCol, int radius);
 bool inBox(int row, int col, int lCol, int rCol, int tRow, int bRow);
+void plusEquals(std::istream& is, std::ostream& os, PPM& src1, const PPM& src2);
+void minusEquals(std::istream& is, std::ostream& os, PPM& src1, const PPM& src2);
+void timesEquals(std::istream& is, std::ostream& os, PPM& src);
+void divideEquals(std::istream& is, std::ostream& os, PPM& src);
+void plus(std::istream& is, std::ostream& os, const PPM& src1, const PPM& src2, PPM& dst);
+void minus(std::istream& is, std::ostream& os, const PPM& src1, const PPM& src2, PPM& dst);
+void times(std::istream& is, std::ostream& os, const PPM& src, PPM& dst);
+void divide(std::istream& is, std::ostream& os, const PPM& src, PPM& dst);
 
 #endif /*_IMAGE_MENU_H_*/

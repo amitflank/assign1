@@ -23,7 +23,7 @@ class PPM {
     void setMaxColorValue(const int& max_color_value);
     void setChannel(const int& row, const int& column, const int& channel, const int& value);
     void setPixel(const int& row, const int& column, const int& red, const int& green, const int& blue);
-    int getImageVectorSize();
+    int getImageVectorSize() const;
     void grayFromChannel(PPM& dst, const int& src_channel) const;
     void grayFromRed(PPM& dst) const;
     void grayFromGreen(PPM& dst) const;
@@ -34,10 +34,25 @@ class PPM {
     int getRowFromIndex(int index);
     int getColFromIndex(int index);
     int getChanFromIndex(int index);
+    bool operator==(const PPM& rhs) const;
+    bool operator!=(const PPM& rhs) const;
+    bool operator<(const PPM& rhs) const;
+    bool operator<=(const PPM& rhs) const;
+    bool operator>(const PPM& rhs) const;
+    bool operator>=(const PPM& rhs) const;
+    PPM& operator+=(const PPM& rhs);
+    PPM& operator-=(const PPM& rhs);
+    PPM& operator*=(const double& rhs);
+    PPM& operator/=(const double& rhs);
+    PPM operator+(const PPM& rhs) const;
+    PPM operator-(const PPM& rhs) const;
+    PPM operator*(const double& rhs) const;
+    PPM operator/(const double& rhs) const;
 
   private:
     void setMetaData(int width, int height, int max_color);
     void assignToSource(int row, int col, int src_chan, PPM src_img);
+    void assignLegalVal(int row, int col, int chan, int val);
     unsigned int mMaxColorValue;
     unsigned int mHeight;
     unsigned int mWidth;

@@ -110,12 +110,21 @@ int assignment2(std::istream& is, std::ostream& os) {
 void showMenu(std::ostream& os){
 	os << "\nActions available:\n\n";
 	os << "read1) Read file into input image 1.\n";
+	os << "read2) Read file into input image 2.\n";
 	os << "write) Write output image to file.\n";
 	os << "copy) Copy input image 1 to output image.\n";
 	os << "red-gray) Set output image from input image 1's grayscale from red.\n";
 	os << "green-gray) Set output image from input image 1's grayscale from green.\n";
 	os << "blue-gray) Set output image from input image 1's grayscale from blue.\n";
 	os << "linear-gray) Set output image from input image 1's grayscale from linear colorimetric.\n";
+	os << "+) Set output image from sum of input image 1 and input image 2\n";
+	os << "+=) Set input image 1 by adding in input image 2\n";
+	os << "-) Set output image from difference of input image 1 and input image 2\n";
+	os << "-=) Set input image 1 by subtracting input image 2\n";
+	os << "*) Set output image from input image 1 multiplied by a number\n";
+	os << "*=) Set input image 1 by multiplying by a number\n";
+	os << "/) Set output image from input image 1 divided by a number\n";
+	os << "/=) Set input image 1 by dividing by a number\n";
 	os << "# Comment to end of line\n";
 	os << "size) Set the size of input image 1\n";
 	os << "max) Set the max color value of input image 1\n";
@@ -290,6 +299,33 @@ void takeAction(std::istream& is, std::ostream& os, const std::string& choice, P
 	else if(choice.compare("read1") == 0){
 		readUserImage(is, os, input_image1);
 	}
+	else if(choice.compare("read2") == 0){
+		readUserImage(is, os, input_image2);
+	}
+	else if(choice.compare("+") == 0){
+		plus(is, os, input_image1, input_image2, output_image);
+	}
+	else if(choice.compare("+=") == 0){
+		plusEquals(is, os, input_image1, input_image2);
+	}
+	else if(choice.compare("-") == 0){
+		minus(is, os, input_image1, input_image2, output_image);
+	}
+	else if(choice.compare("-=") == 0){
+		minusEquals(is, os, input_image1, input_image2);
+	}
+	else if(choice.compare("*") == 0){
+		times(is, os, input_image1, output_image);
+	}
+	else if(choice.compare("*=") == 0){
+		timesEquals(is, os, input_image1);
+	}
+	else if(choice.compare("/") == 0){
+		divide(is, os, input_image1, output_image);
+	}
+	else if(choice.compare("/=") == 0){
+		divideEquals(is, os, input_image1);
+	}
 	else if(choice.compare("red-gray") == 0){
 		input_image1.grayFromRed(output_image);
 	}
@@ -344,6 +380,55 @@ void takeAction(std::istream& is, std::ostream& os, const std::string& choice, P
 
 }
 
+void plusEquals(std::istream& is, std::ostream& os, PPM& src1, const PPM& src2){
+	(void)is;
+	(void)os;
+	src1 += src2;
+}
+
+void minusEquals(std::istream& is, std::ostream& os, PPM& src1, const PPM& src2){
+	(void)is;
+	(void)os;
+	src1 -= src2;
+}
+
+void timesEquals(std::istream& is, std::ostream& os, PPM& src){
+	std::string prompt("Factor? ");
+	double factor = getDouble(is, os, prompt);
+	src *= factor;
+}
+
+void divideEquals(std::istream& is, std::ostream& os, PPM& src){
+	std::string prompt("Factor? ");
+	double factor = getDouble(is, os, prompt) ;
+	src /= factor;
+}
+
+void plus(std::istream& is, std::ostream& os, const PPM& src1, const PPM& src2, PPM& dst){
+	(void)is;
+	(void)os;
+	dst = src1 + src2;
+}
+
+void minus(std::istream& is, std::ostream& os, const PPM& src1, const PPM& src2, PPM& dst){
+	(void)is;
+	(void)os;
+	dst = src1 - src2;
+}
+
+void times(std::istream& is, std::ostream& os, const PPM& src, PPM& dst){
+	std::string prompt("Factor? ");
+	double factor = getDouble(is, os, prompt);
+	dst = src * factor;
+}
+
+void divide(std::istream& is, std::ostream& os, const PPM& src, PPM& dst){
+	std::string prompt("Factor? ");
+	double factor = getDouble(is, os, prompt);
+	dst = src / factor;
+}
+
+
 int imageMenu(std::istream& is, std::ostream& os){
 
 	PPM img1 = PPM(); // tmp vals change in future i geuess
@@ -358,15 +443,8 @@ int imageMenu(std::istream& is, std::ostream& os){
 		if (choice.compare("quit") == 0) {
 			break;
 		}
-
 		takeAction(is, os, choice, img1, img2, outfile);
-
 	}
-	std::string filename = "bye.ppm";
-	std::ifstream testing(filename.c_str());
-	testing >> img2;
-
-
 	return 0;
 }
 

@@ -2,16 +2,16 @@
 #include <sstream>
 
 PPM::PPM() {
-  setMaxColorValue(0);
-  setHeight(0);
-  setWidth(0);
+  mMaxColorValue = 0;
+  mHeight = 0;
+  mWidth = 0;
   mImageData.resize(getImageVectorSize());
 }
 
 PPM::PPM(const int& height, const int& width) {
-  setMaxColorValue(0);
-  setHeight(height);
-  setWidth(width);
+  mMaxColorValue = 0;
+  mHeight = height;
+  mWidth = width;
   mImageData.resize(getImageVectorSize());
 }
 
@@ -58,7 +58,7 @@ int PPM::index(const int& row, const int& column, const int& channel) const {
 }
 
 //Gets number of RGB values in image
-int PPM::getImageVectorSize() {
+int PPM::getImageVectorSize() const{
   return getHeight() * getWidth() * 3;
 }
 
@@ -200,6 +200,239 @@ int PPM::getChanFromIndex(int index){
   return chan;
 
 }
+
+bool PPM::operator==(const PPM& rhs) const{
+  int t_size = getImageVectorSize();
+  int c_size = rhs.getImageVectorSize();
+  if(t_size == c_size){
+    return true;
+  }
+  return false;
+}
+
+bool PPM::operator!=(const PPM& rhs) const{
+  int t_size = getImageVectorSize();
+  int c_size = rhs.getImageVectorSize();
+  if(t_size ==  c_size){
+    return false;
+  }
+  return true;
+}
+
+bool PPM::operator<(const PPM& rhs) const{
+  int t_size = getImageVectorSize();
+  int c_size = rhs.getImageVectorSize();
+  if(t_size < c_size){
+    return true;
+  }
+  return false;
+}
+
+bool PPM::operator<=(const PPM& rhs) const{
+  int t_size = getImageVectorSize();
+  int c_size = rhs.getImageVectorSize();
+  if(t_size <= c_size){
+    return true;
+  }
+  return false;
+}
+
+bool PPM::operator>(const PPM& rhs) const{
+  int t_size = getImageVectorSize();
+  int c_size = rhs.getImageVectorSize();
+  if(t_size > c_size){
+    return true;
+  }
+  return false;
+}
+
+bool PPM::operator>=(const PPM& rhs) const{
+  int t_size = getImageVectorSize();
+  int c_size = rhs.getImageVectorSize();
+  if(t_size >= c_size){
+    return true;
+  }
+  return false;
+}
+
+//Assign given channel to val if legal otherwise assign to closest legal value
+void PPM::assignLegalVal(int row, int col, int chan, int val){
+  int max = getMaxColorValue();
+  if(val > max){
+    setChannel(row, col, chan, max);
+  }
+  else if(val < 0){
+    setChannel(row, col, chan, 0);
+  }
+  else{
+    //std::cout << "Max is: " << max << " Val is: " << val << std::endl;
+    setChannel(row, col, chan, val);
+    //std::cout << "Post op chan is: " << getChannel(row, col, chan)<< std::endl;
+  }
+}
+
+PPM& PPM::operator+=(const PPM& rhs){
+  int width = getWidth();
+  int height = getHeight();
+  int val;
+
+  for(int row = 0; row < height; row++) {
+    for(int col = 0; col < width; col++){
+      for(int chan = 0; chan < 3; chan++){
+        val =  this->getChannel(row, col, chan) + rhs.getChannel(row, col, chan);
+        assignLegalVal(row, col, chan, val);
+      }
+    }
+  }
+  return *this;
+}
+
+PPM& PPM::operator-=(const PPM& rhs){
+  int width = getWidth();
+  int height = getHeight();
+  int val;
+
+  for(int row = 0; row < height; row++) {
+    for(int col = 0; col < width; col++){
+      for(int chan = 0; chan < 3; chan++){
+        val =  this->getChannel(row, col, chan) - rhs.getChannel(row, col, chan);
+        assignLegalVal(row, col, chan, val);
+      }
+    }
+  }
+  return *this;
+}
+
+PPM& PPM::operator*=(const double& rhs){
+  int width = getWidth();
+  int height = getHeight();
+  int val;
+  //std::cout << "m_row is: " << height << "m_col is: " << width << std::endl;
+
+  for(int row = 0; row < height; row++) {
+    for(int col = 0; col < width; col++){
+      for(int chan = 0; chan < 3; chan++){
+        val =  (int) (getChannel(row, col, chan) * rhs);
+        //std::cout << "RHS is: " << rhs << "Val is: " << val  << std::endl;
+        assignLegalVal(row, col, chan, val);
+      }
+    }
+  }
+  return *this;
+}
+
+PPM& PPM::operator/=(const double& rhs){
+  int width = getWidth();
+  int height = getHeight();
+  int val;
+  //int test;
+  //std::cout << "m_row is: " << height << "m_col is: " << width << std::endl;
+
+  for(int row = 0; row < height; row++) {
+    for(int col = 0; col < width; col++){
+      for(int chan = 0; chan < 3; chan++){
+    //    test = getChannel(row, col, chan);
+        val =  (int) (getChannel(row, col, chan) / rhs);
+        //std::cout << "Chan is: " << test << "Val is: " << val << rhs << std::endl;
+        //std::cout << "RHS is: " << rhs << "Val is: " << val  << std::endl;
+        assignLegalVal(row, col, chan, val);
+        //test = getChannel(row, col, chan);
+        //std::cout << "Post op chan is: " << test << std::endl;
+      }
+    }
+  }
+  return *this;
+}
+
+PPM PPM::operator+(const PPM& rhs) const{
+  int width = getWidth();
+  int height = getHeight();
+  int max = getMaxColorValue();
+  int val;
+
+  PPM r_ppm = PPM(height, width);
+  r_ppm.setMaxColorValue(max);
+
+  for(int row = 0; row < height; row++) {
+    for(int col = 0; col < width; col++){
+      for(int chan = 0; chan < 3; chan++){
+        val =  this->getChannel(row, col, chan) + rhs.getChannel(row, col, chan);
+        r_ppm.assignLegalVal(row, col, chan, val);
+      }
+    }
+  }
+
+  return r_ppm;
+}
+
+PPM PPM::operator-(const PPM& rhs) const{
+  int width = getWidth();
+  int height = getHeight();
+  int max = getMaxColorValue();
+  int val;
+
+  PPM r_ppm = PPM(height, width);
+  r_ppm.setMaxColorValue(max);
+
+  for(int row = 0; row < height; row++) {
+    for(int col = 0; col < width; col++){
+      for(int chan = 0; chan < 3; chan++){
+        val =  getChannel(row, col, chan) - rhs.getChannel(row, col, chan);
+        r_ppm.assignLegalVal(row, col, chan, val);
+      }
+    }
+  }
+
+  return r_ppm;
+}
+
+PPM PPM::operator*(const double& rhs) const{
+  int width = getWidth();
+  int height = getHeight();
+  int max = getMaxColorValue();
+  int val;
+  //int test;
+
+  PPM r_ppm = PPM(height, width);
+  r_ppm.setMaxColorValue(max);
+
+  for(int row = 0; row < height; row++) {
+    for(int col = 0; col < width; col++){
+      for(int chan = 0; chan < 3; chan++){
+        //test = getChannel(row, col, chan);
+        val =  (int) (getChannel(row, col, chan) * rhs);
+      //  std::cout << "Chan is: " << test << "Val is: " << val << std::endl;
+        r_ppm.assignLegalVal(row, col, chan, val);
+      //  test = r_ppm.getChannel(row, col, chan);
+      //  std::cout << "Post op chan is: " << test << std::endl;
+      }
+    }
+  }
+
+  return r_ppm;
+}
+
+PPM PPM::operator/(const double& rhs) const{
+  int width = getWidth();
+  int height = getHeight();
+  int max = getMaxColorValue();
+  int val;
+
+  PPM r_ppm = PPM(height, width);
+  r_ppm.setMaxColorValue(max);
+
+  for(int row = 0; row < height; row++) {
+    for(int col = 0; col < width; col++){
+      for(int chan = 0; chan < 3; chan++){
+        val =  (int) (getChannel(row, col, chan) / rhs);
+        r_ppm.assignLegalVal(row, col, chan, val);
+      }
+    }
+  }
+
+  return r_ppm;
+}
+
 
 void skipNL(std::istream& is)  {
   unsigned char c;
