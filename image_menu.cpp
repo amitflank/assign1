@@ -116,6 +116,8 @@ void showMenu(std::ostream& os){
 	os << "red-gray) Set output image from input image 1's grayscale from red.\n";
 	os << "green-gray) Set output image from input image 1's grayscale from green.\n";
 	os << "blue-gray) Set output image from input image 1's grayscale from blue.\n";
+	os << "v-edge) Set output image from input image 1's vertical edge detection\n";
+	os << "h-edge) Set output image from input image 1's horizontal edge detection\n";
 	os << "linear-gray) Set output image from input image 1's grayscale from linear colorimetric.\n";
 	os << "+) Set output image from sum of input image 1 and input image 2\n";
 	os << "+=) Set input image 1 by adding in input image 2\n";
@@ -134,6 +136,8 @@ void showMenu(std::ostream& os){
 	os << "diamond) Draw a diamond shape in input image 1\n";
 	os << "circle) Draw a circle shape in input image 1\n";
 	os << "box) Draw a box shape in input image 1\n";
+	os << "quiet) Toggle output quieting\n";
+	os << "run) Run commands from another file\n";
 	os << "quit) Quit\n\n";
 }
 
@@ -338,6 +342,19 @@ void takeAction(std::istream& is, std::ostream& os, const std::string& choice, P
 	else if(choice.compare("linear-gray") == 0){
 		input_image1.grayFromLinearColorimetric(output_image);
 	}
+	else if(choice.compare("v-edge") == 0){
+		input_image1.findVerticalEdges(output_image);
+	}
+	else if(choice.compare("h-edge") == 0){
+		input_image1.findHorizontalEdges(output_image);
+	}
+	else if(choice.compare("quiet") == 0){
+		int z = 0; //placeholder do nothing
+		z++; //stupid compilier
+	}
+	else if(choice.compare("run") == 0){
+		runFile(is, os, input_image1, input_image2, output_image);
+	}
 	else if (choice.compare("copy") == 0) {
 		output_image = input_image1;
 	}
@@ -375,7 +392,7 @@ void takeAction(std::istream& is, std::ostream& os, const std::string& choice, P
 	}
 	//print error msg
 	else {
-		os << "Unknown action ‘WhatWasTyped’." << std::endl;
+		os << "Unknown action '" << choice << "'." << std::endl;
 	}
 
 }
@@ -428,22 +445,50 @@ void divide(std::istream& is, std::ostream& os, const PPM& src, PPM& dst){
 	dst = src / factor;
 }
 
+void quietMenu(std::ostream& os, bool quiet){
+	if(!quiet){
+		showMenu(os);
+	}
+}
+std::string quietChoice(std::istream& is, std::ostream& os, bool quiet){
+	std::stringstream dummy;
+	if(!quiet){
+	 return getChoice(is, os);
+	}
+	else{
+		return getChoice(is, dummy);
+	}
+}
 
+void quietAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image, bool quiet){
+	std::stringstream dummy;
+	if(!quiet){
+		takeAction(is, os, choice, input_image1, input_image2, output_image);
+	}
+	else{
+		takeAction(is, dummy, choice, input_image1, input_image2, output_image);
+	}
+}
 int imageMenu(std::istream& is, std::ostream& os){
 
 	PPM img1 = PPM(); // tmp vals change in future i geuess
 	PPM img2 = PPM();
 	PPM outfile = PPM();
+	bool quiet = false;
 
 	while(true) {
-		showMenu(os);
-		std::string choice = getChoice(is, os);
+
+		quietMenu(os, quiet);
+		std::string choice = quietChoice(is, os, quiet);
 
 		//We exit if we get a quit msg from user
 		if (choice.compare("quit") == 0) {
 			break;
 		}
-		takeAction(is, os, choice, img1, img2, outfile);
+		if (choice.compare("quiet") == 0){
+			quiet = !quiet;
+		}
+		quietAction(is, os, choice, img1, img2, outfile, quiet);
 	}
 	return 0;
 }
@@ -455,4 +500,30 @@ void readUserImage(std::istream& is, std::ostream& os, PPM& ppm){
 
 	inFile >> ppm;
 	inFile.close();
+}
+
+int runFile(std::istream& is, std::ostream& os, PPM& input_image1, PPM& input_image2, PPM& output_image){
+	std::string file_prompt = "File? ";
+	std::string filename = getString(is, os, file_prompt);
+	std::ifstream inFile(filename.c_str());
+
+
+	if(inFile.is_open()){
+		std::string choice;
+		bool quiet = true;
+
+		while(inFile.good()){
+
+			choice = quietChoice(inFile, os, quiet);
+			if (choice.compare("quit") == 0) {
+				break;
+			}
+			quietAction(inFile, os, choice, input_image1, input_image2, output_image, quiet);
+		}
+		inFile.close();
+		return 0;
+	}
+	else{
+		return 1;
+	}
 }

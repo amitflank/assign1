@@ -1,5 +1,5 @@
 #include "PPM.h"
-#include <sstream>
+
 
 PPM::PPM() {
   mMaxColorValue = 0;
@@ -173,6 +173,50 @@ std::ostream& operator<<(std::ostream& os, const PPM& rhs) {
   os.write((char *) vec, vec_size);
 
   return os;
+}
+
+int PPM::edgePixelValue(const int& row1, const int& column1, const int& row2, const int& column2) const{
+  double pix1 = linearColorimetricPixelValue(row1, column1);
+  double pix2 = linearColorimetricPixelValue(row2, column2);
+  double diff = abs(pix1 - pix2);
+  double d_max = (double) getMaxColorValue();//not sure the how auto type casting works in c++ so i'll just make it explicit
+
+
+  if(diff >= (.1 * d_max)){
+    return getMaxColorValue();
+  }
+  return 0;
+}
+
+//Do operations for either vertical of horiontal allEdges
+//edgeType = 0 for vertical, edgeType = 1 for horiontal
+void PPM::allEdges(PPM& dst, int edgeType) const{
+  int h = getHeight();
+  int w = getWidth();
+  int val = 0;
+
+  dst.setMetaData(w, h, getMaxColorValue());
+
+  for(int row = 0; row < h; row++){
+    for(int col = 0; col < w; col++){
+
+      if (col != 0 && edgeType == 0){
+        val = edgePixelValue(row, col, row, col - 1);
+      }
+      if (row != 0 && edgeType == 1){
+        val = edgePixelValue(row - 1, col, row, col);
+      }
+      dst.setPixel(row, col, val, val, val);
+    }
+  }
+}
+
+void PPM::findVerticalEdges(PPM& dst) const{
+  allEdges(dst, 0);
+}
+
+void PPM::findHorizontalEdges(PPM& dst) const{
+  allEdges(dst, 1);
 }
 
 int PPM::getRowFromIndex(int index){

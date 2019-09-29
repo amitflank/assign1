@@ -3,7 +3,7 @@
 #define _PPM_H_
 #include <iostream>
 #include <vector>
-
+#include <sstream>
 
 
 class PPM {
@@ -48,11 +48,15 @@ class PPM {
     PPM operator-(const PPM& rhs) const;
     PPM operator*(const double& rhs) const;
     PPM operator/(const double& rhs) const;
+    int edgePixelValue(const int& row1, const int& column1, const int& row2, const int& column2) const;
+    void findVerticalEdges(PPM& dst) const;
+    void findHorizontalEdges(PPM& dst) const;
 
   private:
     void setMetaData(int width, int height, int max_color);
     void assignToSource(int row, int col, int src_chan, PPM src_img);
     void assignLegalVal(int row, int col, int chan, int val);
+    void allEdges(PPM& dst, int edgeType) const;
     unsigned int mMaxColorValue;
     unsigned int mHeight;
     unsigned int mWidth;

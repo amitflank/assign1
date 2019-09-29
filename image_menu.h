@@ -1,7 +1,6 @@
 #ifndef _IMAGE_MENU_H_
 #define _IMAGE_MENU_H_
 #include <string>
-#include <iostream>
 #include "PPM.h"
 
 std::string getString( std::istream& is, std::ostream& os, const std::string& prompt);
@@ -12,7 +11,9 @@ void writeUserImage(std::istream& is, std::ostream& os, const PPM& p);
 int assignment2(std::istream& is, std::ostream& os);
 
 void showMenu(std::ostream& os);
+void quietMenu(std::ostream& os, bool quiet);
 std::string getChoice(std::istream& is, std::ostream& os);
+std::string quietChoice(std::istream& is, std::ostream& os, bool quiet);
 void commentLine(std::istream& is);
 void setSize(std::istream& is, std::ostream& os, PPM& src);
 void setMaxColorValue(std::istream& is, std::ostream& os, PPM& src);
@@ -23,6 +24,7 @@ void drawDiamond(std::istream& is, std::ostream& os, PPM& src);
 void drawCircle(std::istream& is, std::ostream& os, PPM& src);
 void drawBox(std::istream& is, std::ostream& os, PPM& src);
 void takeAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image);
+void quietAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image, bool quiet);
 int imageMenu(std::istream& is, std::ostream& os);
 void readUserImage(std::istream& is, std::ostream& os, PPM& ppm);
 bool inDiamond(int row, int col, int cRow, int cCol, int size);
@@ -36,5 +38,6 @@ void plus(std::istream& is, std::ostream& os, const PPM& src1, const PPM& src2, 
 void minus(std::istream& is, std::ostream& os, const PPM& src1, const PPM& src2, PPM& dst);
 void times(std::istream& is, std::ostream& os, const PPM& src, PPM& dst);
 void divide(std::istream& is, std::ostream& os, const PPM& src, PPM& dst);
+int runFile(std::istream& is, std::ostream& os, PPM& input_image1, PPM& input_image2, PPM& output_image);
 
 #endif /*_IMAGE_MENU_H_*/
