@@ -138,6 +138,10 @@ void showMenu(std::ostream& os){
 	os << "box) Draw a box shape in input image 1\n";
 	os << "quiet) Toggle output quieting\n";
 	os << "run) Run commands from another file\n";
+	os << "grid) Configure the grid.\n";
+	os << "square) Draw a square shape in input image 1\n";
+	os << "grid-set) Set a single value in the grid.\n";
+	os << "grid-apply) Use the grid values to set colors in the output image.\n";
 	os << "quit) Quit\n\n";
 }
 
@@ -293,9 +297,7 @@ void drawBox(std::istream& is, std::ostream& os, PPM& src){
 		}
 	}
 }
-void takeAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image){
-
-	(void)input_image2;
+void takeAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image, NumberGrid& grid){
 
 	if (choice.compare("write") == 0) {
 		writeUserImage(is, os, output_image);
@@ -353,7 +355,7 @@ void takeAction(std::istream& is, std::ostream& os, const std::string& choice, P
 		z++; //stupid compilier
 	}
 	else if(choice.compare("run") == 0){
-		runFile(is, os, input_image1, input_image2, output_image);
+		runFile(is, os, input_image1, input_image2, output_image, grid);
 	}
 	else if (choice.compare("copy") == 0) {
 		output_image = input_image1;
@@ -385,6 +387,18 @@ void takeAction(std::istream& is, std::ostream& os, const std::string& choice, P
 	}
 	else if (choice.compare("box") == 0) {
 		drawBox(is, os, input_image1);
+	}
+	else if (choice.compare("grid") == 0) {
+		configureGrid(is, os, grid);
+	}
+	else if (choice.compare("grid-set") == 0) {
+		setGrid(is, os, grid);
+	}
+	else if (choice.compare("grid-apply") == 0) {
+		applyGrid(is, os, grid, output_image);
+	}
+	else if (choice.compare("square") == 0) {
+		drawSquare(is, os, input_image1);
 	}
 	else if (choice.compare("quit") == 0) {
 		int z = 0; //placeholder do nothing
@@ -460,21 +474,21 @@ std::string quietChoice(std::istream& is, std::ostream& os, bool quiet){
 	}
 }
 
-void quietAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image, bool quiet){
+void quietAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image, bool quiet, NumberGrid& grid){
 	std::stringstream dummy;
 	if(!quiet){
-		takeAction(is, os, choice, input_image1, input_image2, output_image);
+		takeAction(is, os, choice, input_image1, input_image2, output_image, grid);
 	}
 	else{
-		takeAction(is, dummy, choice, input_image1, input_image2, output_image);
+		takeAction(is, dummy, choice, input_image1, input_image2, output_image, grid);
 	}
 }
 int imageMenu(std::istream& is, std::ostream& os){
-
 	PPM img1 = PPM(); // tmp vals change in future i geuess
 	PPM img2 = PPM();
 	PPM outfile = PPM();
 	bool quiet = false;
+	NumberGrid grid = NumberGrid();
 
 	while(true) {
 
@@ -488,7 +502,7 @@ int imageMenu(std::istream& is, std::ostream& os){
 		if (choice.compare("quiet") == 0){
 			quiet = !quiet;
 		}
-		quietAction(is, os, choice, img1, img2, outfile, quiet);
+		quietAction(is, os, choice, img1, img2, outfile, quiet, grid);
 	}
 	return 0;
 }
@@ -502,7 +516,7 @@ void readUserImage(std::istream& is, std::ostream& os, PPM& ppm){
 	inFile.close();
 }
 
-int runFile(std::istream& is, std::ostream& os, PPM& input_image1, PPM& input_image2, PPM& output_image){
+int runFile(std::istream& is, std::ostream& os, PPM& input_image1, PPM& input_image2, PPM& output_image, NumberGrid& grid){
 	std::string file_prompt = "File? ";
 	std::string filename = getString(is, os, file_prompt);
 	std::ifstream inFile(filename.c_str());
@@ -518,7 +532,7 @@ int runFile(std::istream& is, std::ostream& os, PPM& input_image1, PPM& input_im
 			if (choice.compare("quit") == 0) {
 				break;
 			}
-			quietAction(inFile, os, choice, input_image1, input_image2, output_image, quiet);
+			quietAction(inFile, os, choice, input_image1, input_image2, output_image, quiet, grid);
 		}
 		inFile.close();
 		return 0;
@@ -526,4 +540,65 @@ int runFile(std::istream& is, std::ostream& os, PPM& input_image1, PPM& input_im
 	else{
 		return 1;
 	}
+}
+
+void configureGrid(std::istream& is, std::ostream& os, NumberGrid& grid){
+	std::string prompt1 = "Grid Height? ";
+	std::string prompt2 = "Grid Width? ";
+	std::string prompt3 = "Grid Max Value? ";
+
+	int height = getInteger(is, os, prompt1);
+	int width = getInteger(is, os, prompt2);
+	int max = getInteger(is, os, prompt3);
+
+	grid.setGridSize(height, width);
+	grid.setMaxNumber(max);
+}
+
+void setGrid(std::istream& is, std::ostream& os, NumberGrid& grid){
+	std::string prompt1 = "Grid Row? ";
+	std::string prompt2 = "Grid Column? ";
+	std::string prompt3 = "Grid Value? ";
+
+	int row = getInteger(is, os, prompt1);
+	int col = getInteger(is, os, prompt2);
+	int val = getInteger(is, os, prompt3);
+
+	grid.setNumber(row, col, val);
+}
+
+void applyGrid(std::istream& is, std::ostream& os, NumberGrid& grid, PPM& dst){
+	(void) is;
+	(void) os;
+	grid.setPPM(dst);
+}
+
+void drawSquare(std::istream& is, std::ostream& os, PPM& src){
+	std::string prompt1 = "Row? ";
+	std::string prompt2 = "Column? ";
+	std::string prompt3 = "Size? ";
+	std::string prompt4 = "Red? ";
+	std::string prompt5 = "Green? ";
+	std::string prompt6 = "Blue? ";
+
+	int crow = getInteger(is, os, prompt1);
+	int ccol = getInteger(is, os, prompt2);
+	int size = getInteger(is, os, prompt3);
+	int red = getInteger(is, os, prompt4);
+	int green = getInteger(is, os, prompt5);
+	int blue = getInteger(is, os, prompt6);
+	bool validRow;
+	bool validCol;
+
+
+
+	for(int row = 0; row < src.getHeight(); row++){
+		for(int col = 0; col < src.getWidth(); col++){
+			validRow = (row > (crow - size / 2)) && (crow < (crow + size / 2));
+			validCol = (col > (ccol - size / 2)) && (ccol < (ccol + size / 2));
+			if(validCol && validRow){
+				src.setPixel(row, col, red, green, blue);
+			}
+	}
+
 }

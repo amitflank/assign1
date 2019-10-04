@@ -2,6 +2,7 @@
 #define _IMAGE_MENU_H_
 #include <string>
 #include "PPM.h"
+#include "number_grid.h"
 
 std::string getString( std::istream& is, std::ostream& os, const std::string& prompt);
 int getInteger(std::istream& is, std::ostream& os, const std::string& prompt);
@@ -23,8 +24,8 @@ void clearAll(PPM& src);
 void drawDiamond(std::istream& is, std::ostream& os, PPM& src);
 void drawCircle(std::istream& is, std::ostream& os, PPM& src);
 void drawBox(std::istream& is, std::ostream& os, PPM& src);
-void takeAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image);
-void quietAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image, bool quiet);
+void takeAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image, NumberGrid& grid);
+void quietAction(std::istream& is, std::ostream& os, const std::string& choice, PPM& input_image1, PPM& input_image2, PPM& output_image, bool quiet, NumberGrid& grid);
 int imageMenu(std::istream& is, std::ostream& os);
 void readUserImage(std::istream& is, std::ostream& os, PPM& ppm);
 bool inDiamond(int row, int col, int cRow, int cCol, int size);
@@ -38,6 +39,9 @@ void plus(std::istream& is, std::ostream& os, const PPM& src1, const PPM& src2, 
 void minus(std::istream& is, std::ostream& os, const PPM& src1, const PPM& src2, PPM& dst);
 void times(std::istream& is, std::ostream& os, const PPM& src, PPM& dst);
 void divide(std::istream& is, std::ostream& os, const PPM& src, PPM& dst);
-int runFile(std::istream& is, std::ostream& os, PPM& input_image1, PPM& input_image2, PPM& output_image);
-
+int runFile(std::istream& is, std::ostream& os, PPM& input_image1, PPM& input_image2, PPM& output_image, NumberGrid& grid);
+void configureGrid(std::istream& is, std::ostream& os, NumberGrid& grid);
+void setGrid(std::istream& is, std::ostream& os, NumberGrid& grid);
+void applyGrid(std::istream& is, std::ostream& os, NumberGrid& grid, PPM& dst);
+void drawSquare(std::istream& is, std::ostream& os, PPM& src);
 #endif /*_IMAGE_MENU_H_*/
